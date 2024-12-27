@@ -1,0 +1,917 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+
+
+<head>
+    <meta charset="utf-8">
+    <meta name="keywords" content="哪里有 class 告诉我？, javadaydayup&#39;s blog">
+    <meta name="description" content="本文介绍用户类路径的设置的参数以及不同设置方法的优先级以及从 JVM 源码角度分析了引导类路径是如何设置的，让你对不同的类路径有更深刻的理解。">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="renderer" content="webkit|ie-stand|ie-comp">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="referrer" content="no-referrer-when-downgrade">
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+
+
+    <title>哪里有 class 告诉我？ | javadaydayup&#39;s blog</title>
+    <link rel="icon" type="image/png" href="/favicon.png">
+    
+
+
+    <!-- bg-cover style     -->
+
+
+
+<link rel="stylesheet" type="text/css" href="/libs/awesome/css/all.min.css">
+<link rel="stylesheet" type="text/css" href="/libs/materialize/materialize.min.css">
+<link rel="stylesheet" type="text/css" href="/libs/aos/aos.css">
+<link rel="stylesheet" type="text/css" href="/libs/animate/animate.min.css">
+<link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
+<link rel="stylesheet" type="text/css" href="/css/matery.css">
+<link rel="stylesheet" type="text/css" href="/css/my.css">
+<link rel="stylesheet" type="text/css" href="/css/dark.css" media="none" onload="if(media!='all')media='all'">
+
+
+
+
+    <link rel="stylesheet" href="/libs/tocbot/tocbot.css">
+    <link rel="stylesheet" href="/css/post.css">
+
+
+
+
+    
+
+
+
+    <script src="/libs/jquery/jquery-3.6.0.min.js"></script>
+
+<meta name="generator" content="Hexo 7.3.0"><link rel="alternate" href="/atom.xml" title="javadaydayup's blog" type="application/atom+xml">
+</head>
+
+
+<body>
+    <header class="navbar-fixed">
+    <nav id="headNav" class="bg-color nav-transparent">
+        <div id="navContainer" class="nav-wrapper container">
+            <div class="brand-logo">
+                <a href="/" class="waves-effect waves-light">
+                    
+                    <img src="/medias/logo.jpg" class="logo-img" alt="LOGO">
+                    
+                    <span class="logo-span">javadaydayup&#39;s blog</span>
+                </a>
+            </div>
+            
+
+<a href="#" data-target="mobile-nav" class="sidenav-trigger button-collapse"><i class="fas fa-bars"></i></a>
+<ul class="right nav-menu">
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/" class="waves-effect waves-light">
+      
+      <i class="fas fa-home" style="zoom: 0.6;"></i>
+      
+      <span>首页</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/categories" class="waves-effect waves-light">
+      
+      <i class="fas fa-bookmark" style="zoom: 0.6;"></i>
+      
+      <span>分类</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/archives" class="waves-effect waves-light">
+      
+      <i class="fas fa-archive" style="zoom: 0.6;"></i>
+      
+      <span>归档</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/about" class="waves-effect waves-light">
+      
+      <i class="fas fa-user-circle" style="zoom: 0.6;"></i>
+      
+      <span>关于</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/friends" class="waves-effect waves-light">
+      
+      <i class="fas fa-address-book" style="zoom: 0.6;"></i>
+      
+      <span>友情链接</span>
+    </a>
+    
+  </li>
+  
+  <li>
+    <a href="#searchModal" class="modal-trigger waves-effect waves-light">
+      <i id="searchIcon" class="fas fa-search" title="搜索" style="zoom: 0.85;"></i>
+    </a>
+  </li>
+  <li>
+    <a href="javascript:;" class="waves-effect waves-light" onclick="switchNightMode()" title="深色/浅色模式" >
+      <i id="sum-moon-icon" class="fas fa-sun" style="zoom: 0.85;"></i>
+    </a>
+  </li>
+</ul>
+
+
+<div id="mobile-nav" class="side-nav sidenav">
+
+    <div class="mobile-head bg-color">
+        
+        <img src="/medias/logo.jpg" class="logo-img circle responsive-img">
+        
+        <div class="logo-name">javadaydayup&#39;s blog</div>
+        <div class="logo-desc">
+            
+            Never really desperate, only the lost of the soul.
+            
+        </div>
+    </div>
+
+    <ul class="menu-list mobile-menu-list">
+        
+        <li class="m-nav-item">
+	  
+		<a href="/" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-home"></i>
+			
+			首页
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/categories" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-bookmark"></i>
+			
+			分类
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/archives" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-archive"></i>
+			
+			归档
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/about" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-user-circle"></i>
+			
+			关于
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/friends" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-address-book"></i>
+			
+			友情链接
+		</a>
+          
+        </li>
+        
+        
+    </ul>
+</div>
+
+
+        </div>
+
+        
+    </nav>
+
+</header>
+
+    
+
+
+
+<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/images/covers/where-are-classes.webp')">
+    <div class="container" style="right: 0px;left: 0px;">
+        <div class="row">
+            <div class="col s12 m12 l12">
+                <div class="brand">
+                    <h1 class="description center-align post-title">哪里有 class 告诉我？</h1>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<main class="post-container content">
+
+    
+    <div class="row">
+    <div id="main-content" class="col s12 m12 l9">
+        <!-- 文章内容详情 -->
+<div id="artDetail">
+    <div class="card">
+        <div class="card-content article-info">
+            <div class="row tag-cate">
+                <div class="col s7">
+                    
+                          <div class="article-tag">
+                            <span class="chip bg-color">无标签</span>
+                          </div>
+                    
+                </div>
+                <div class="col s5 right-align">
+                    
+                    <div class="post-cate">
+                        <i class="fas fa-bookmark fa-fw icon-category"></i>
+                        
+                            <a href="/categories/Java/" class="post-category">
+                                Java
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+            </div>
+
+            <div class="post-info">
+                
+                <div class="post-date info-break-policy">
+                    <i class="far fa-calendar-minus fa-fw"></i>发布日期:&nbsp;&nbsp;
+                    2024-12-11
+                </div>
+                
+
+                
+
+                
+
+                
+
+                
+            </div>
+        </div>
+        <hr class="clearfix">
+
+        
+
+        
+
+        <div class="card-content article-card-content">
+            <div id="articleContent">
+                <h2 id="说明"><a href="#说明" class="headerlink" title="说明"></a>说明</h2><p>本文中的 JVM 参数和代码在 JDK 8 版本生效。</p>
+<h2 id="哪里有用户类？"><a href="#哪里有用户类？" class="headerlink" title="哪里有用户类？"></a>哪里有用户类？</h2><p>用户类是由开发者和第三方定义的类，它是由应用程序类加载器加载的。</p>
+<p>Java 程序可以通过<code>CLASSPATH</code> 环境变量，JVM 启动参数 <code>-cp</code> 或者 <code>-classpath</code> 指定用户需要加载的类的路径。这两个配置的优先级从低到高，后面的配置会覆盖前面的配置，默认值是「.」，即当前路径。</p>
+<p><img src="https://raw.githubusercontent.com/javadaydayup/pictures/main/20241210155900.png" alt="image.png"></p>
+<p>接下来对默认值和优先级进行验证：</p>
+<h3 id="验证默认值是当前路径"><a href="#验证默认值是当前路径" class="headerlink" title="验证默认值是当前路径"></a>验证默认值是当前路径</h3><p>现在有一个 Temp.java 类，它不在任何包路径下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Temp</span> &#123;  </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;  </span><br><span class="line">        System.out.println(<span class="string">&quot;Executed!&quot;</span>);  </span><br><span class="line">    &#125;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>同时这个时候系统没有配置 <code>CLASSPATH</code> 这个环境变量，如下图所示：</p>
+<p><img src="https://raw.githubusercontent.com/javadaydayup/pictures/main/20241206204249.png" alt="image.png"></p>
+<p>然后拷贝这个编译后的 <code>Temp.class</code> 文件放到 E 盘的下，然后执行命令 <code>java Temp</code> 命令，是能够正常运行这个 Class 文件的。这个时候并没有配置 <code>CLASSPATH</code> 环境变量，同时也没有在执行命令时指定任何参数，说明类加载器是根据 class path 的默认值去找到这个 Class 文件的，这个默认值就是当前路径。如下图所示：</p>
+<p><img src="https://raw.githubusercontent.com/javadaydayup/pictures/main/20241206204511.png" alt="image.png"></p>
+<p>根据<a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/technotes/tools/findingclasses.html">官方文档</a>所说 Java 程序启动的时候会把 class path 的值放到 <code>java.class.path</code> 这个系统属性中，如下图所示：</p>
+<p><img src="https://raw.githubusercontent.com/javadaydayup/pictures/main/20241206211609.png" alt="image.png"></p>
+<p>修改上面的代码，在程序运行的时候把实际的 class path 打印出来，代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Temp</span> &#123;  </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;  </span><br><span class="line">        System.out.println(<span class="string">&quot;Executed!&quot;</span>);  </span><br><span class="line">        System.out.println(<span class="string">&quot;The actual class path is :&quot;</span> + System.getProperty(<span class="string">&quot;java.class.path&quot;</span>));  </span><br><span class="line">    &#125;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>代码执行结果如下图所示：<br><img src="https://raw.githubusercontent.com/javadaydayup/pictures/main/20241206212225.png" alt="image.png"></p>
+<p>可以看到代码打印的结果是「.」，即当前路径。</p>
+<h3 id="验证-CLASSPATH-环境变量的作用"><a href="#验证-CLASSPATH-环境变量的作用" class="headerlink" title="验证 CLASSPATH 环境变量的作用"></a>验证 CLASSPATH 环境变量的作用</h3><p>增加 Windows 系统环境变量，因为上面是把 Temp.class 文件放到了 E 盘下面，所以这里设置的 CLASSPATH 环境变量也是 E 盘，如下图所示：</p>
+<p><img src="https://raw.githubusercontent.com/javadaydayup/pictures/main/20241206212640.png" alt="image.png"></p>
+<p><img src="https://raw.githubusercontent.com/javadaydayup/pictures/main/20241206212746.png" alt="image.png"></p>
+<p>再次运行程序，执行结果如下图所示：<br><img src="https://raw.githubusercontent.com/javadaydayup/pictures/main/20241206212916.png" alt="image.png"></p>
+<p>程序能够正常执行说明通过配置的 E: 这个路径，类加载器能够找到 <code>Temp.class</code> 文件。同时打印的 class path 也是 E: ，符合设置。</p>
+<h3 id="验证-cp-或者-classpath-参数的作用"><a href="#验证-cp-或者-classpath-参数的作用" class="headerlink" title="验证 -cp 或者 -classpath 参数的作用"></a>验证 <code>-cp</code> 或者 <code>-classpath</code> 参数的作用</h3><p>把上面设置的 <code>CLASSPATH</code> 环境变量删除，然后通过执行 java 命令的时候指定 <code>-cp</code> 参数来设置 class path 的路径。如下图所示：</p>
+<p><img src="https://raw.githubusercontent.com/javadaydayup/pictures/main/20241206204249.png" alt="image.png"></p>
+<p><img src="https://raw.githubusercontent.com/javadaydayup/pictures/main/20241206213644.png" alt="image.png"></p>
+<p>程序执行的效果和通过 <code>CLASSPATH</code> 环境变量设置的相同。</p>
+<h3 id="验证-cp或-classpath-参数的优先级高于-CLASSPATH-环境变量"><a href="#验证-cp或-classpath-参数的优先级高于-CLASSPATH-环境变量" class="headerlink" title="验证 -cp或 -classpath 参数的优先级高于 CLASSPATH 环境变量"></a>验证 <code>-cp</code>或 <code>-classpath</code> 参数的优先级高于 <code>CLASSPATH</code> 环境变量</h3><p>设置 <code>CLASSPATH</code> 环境变量为 D: ，如下图所示：</p>
+<p><img src="https://raw.githubusercontent.com/javadaydayup/pictures/main/20241206213917.png" alt="image.png"></p>
+<p><img src="https://raw.githubusercontent.com/javadaydayup/pictures/main/20241206214256.png" alt="image.png"></p>
+<p>如果不带 <code>-cp</code> 参数执行执行会提示找不到类，因为 D: 路径下没有 <code>Temp.class</code> 这个文件。如下图所示：<br><img src="https://raw.githubusercontent.com/javadaydayup/pictures/main/20241206214334.png" alt="image.png"></p>
+<p>带上 <code>-cp</code> 参数后就能够正常执行，这个时候两个配置都有，但是 <code>-cp</code> 参数的配置生效了，说明 <code>-cp</code> 参数的优先级高于 <code>CLASSPAHTH</code> 环境变量。如下图所示：<br><img src="https://raw.githubusercontent.com/javadaydayup/pictures/main/20241206214639.png" alt="image.png"></p>
+<h2 id="哪里有引导类？"><a href="#哪里有引导类？" class="headerlink" title="哪里有引导类？"></a>哪里有引导类？</h2><h3 id="sun-boot-class-path-系统属性的值"><a href="#sun-boot-class-path-系统属性的值" class="headerlink" title="sun.boot.class.path 系统属性的值"></a><code>sun.boot.class.path</code> 系统属性的值</h3><p>引导类指的是构成 Java 平台的类，包括 rt.jar 中的类以及其他几个重要的 jar 文件中的类，它们是由引导类加载器（Bootstrap ClassLoader）加载的。</p>
+<p>在前面可以看到如果直接在 <code>Temp.class</code> 文件所在的路径下执行 <code>java Temp</code>命令就能够正常执行。那这个 <code>Temp</code> 类的父类是 <code>Object</code> 类，这个类是在 <code>jre/lib</code> 目录下的 <code>rt.jar</code> 包中，但是没有任何地方指定了这个路径，那引导类加载器（BootstrapClassLoader） 是如何找 Object 类并加载的呢？</p>
+<p>根据<a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/technotes/tools/findingclasses.html">官方文档</a>说的引导类加载器加载的 class path 可以通过 <code>sun.boot.class.path</code> 这个系统属性获取到，如下图所示：<br><img src="https://raw.githubusercontent.com/javadaydayup/pictures/main/20241206215601.png" alt="image.png"></p>
+<p>把上面的代码修改为如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Temp</span> &#123;  </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;  </span><br><span class="line">        System.out.println(<span class="string">&quot;Executed!&quot;</span>);  </span><br><span class="line">        System.out.println(<span class="string">&quot;The actual class path is :&quot;</span> + System.getProperty(<span class="string">&quot;sun.boot.class.path&quot;</span>));  </span><br><span class="line">    &#125;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>通过 <code>java Temp</code> 命令执行后(不配置 <code>CLASSPATH</code> 环境变量，让它使用默认值)，结果如下：</p>
+<p><img src="https://raw.githubusercontent.com/javadaydayup/pictures/main/20241206220849.png" alt="image.png"></p>
+<p>可以看到输出结果里面有 rt.jar 包的绝对路径。实际上并没有任何地方指定了这个路径，那么这个路径怎么获取到并设置到 <code>sun.boot.class.path</code> 这个系统属性中的呢？</p>
+<h3 id="sun-boot-class-path-系统属性赋值源码分析"><a href="#sun-boot-class-path-系统属性赋值源码分析" class="headerlink" title="sun.boot.class.path 系统属性赋值源码分析"></a><code>sun.boot.class.path</code> 系统属性赋值源码分析</h3><p>这里以 Windows 平台为例分析一下 HotSpot 虚拟机的源码实现。这里主要涉及到三个文件的内容，分别是：<br><code>hotspot\src\share\vm\runtime\arguments.cpp</code><br><code>hotspot\src\share\vm\runtime\os.cpp</code><br><code>hotspot\src\os\windows\vm\os_windows.cpp</code>  </p>
+<p><img src="https://raw.githubusercontent.com/javadaydayup/pictures/main/20241210161105.png" alt="image.png"></p>
+<p>源代码的调用链路如下：</p>
+<p><img src="https://raw.githubusercontent.com/javadaydayup/pictures/main/arguments.jpg" alt="arguments.jpg"></p>
+<p><code>arguments.cpp</code> 负责处理 JVM 启动的参数，在这个文件中会初始化 <code>_java_home</code> 和<code>_sun_boot_class_path</code> 系统属性，如下图所示：</p>
+<p><img src="https://raw.githubusercontent.com/javadaydayup/pictures/main/20241210131929.png" alt="image.png"></p>
+<p>然后调用 <code>os_windows.cpp</code> 的 <code>init_system_properties_values()</code> 方法，在该方法中又会调用 <code>os_windows.cpp</code> 中的 <code>jvm_path()</code> 方法，该方法中会尝试去获取 <code>jvm.dll</code> 的绝对路径，如下图所示：</p>
+<p><img src="https://raw.githubusercontent.com/javadaydayup/pictures/main/20241210134801.png" alt="image.png"></p>
+<p><img src="https://raw.githubusercontent.com/javadaydayup/pictures/main/20241210134858.png" alt="image.png"><br><img src="https://raw.githubusercontent.com/javadaydayup/pictures/main/20241210135324.png" alt="image.png"></p>
+<p>然后返回到<code>os_windows.cpp</code> 的 <code>init_system_properties_values()</code> 方法，去除掉路径中的 <code>jvm.dll</code>，<code>server/client</code>，<code>bin</code> 然后放入到前面创建的 <code>_java_home</code> 系统属性中，如下图所示：</p>
+<p><img src="https://raw.githubusercontent.com/javadaydayup/pictures/main/20241210135725.png" alt="image.png"></p>
+<p>然后再继续调用 <code>os.cpp</code> 中的 <code>set_boot_path()</code> 方法，在这个方法中获取 <code>_java_home</code> 系统属性中的值，用来格式化引导类 jar 包的路径，然后放入到 <code>_sun_boot_class_path</code> 中。 如下图所示：</p>
+<p><img src="https://raw.githubusercontent.com/javadaydayup/pictures/main/20241210140401.png" alt="image.png"></p>
+<p>这就是 <code>sun.boot.class.path</code> 系统属性值在 Java 程序启动时的设置过程。</p>
+<p><a target="_blank" rel="noopener" href="https://book.douban.com/subject/34907497/">深入理解Java虚拟机</a>中介绍到「引导类加载器负责加载存放在<JAVA_HOME>&#x2F;lib 目录下或者被 <code>-Xbootclasspath</code> 参数所指定的路径中存放的，且是 Java 虚拟机能够识别的（按照文件名识别，例如 rt.jar，名字不符合的类库即使是放在 lib 目录中也不会被加载）」。这里所描述的「按照文件名识别」指的应该就是上面 <code>os.cpp</code> 的 <code>set_boot_path()</code> 方法中定义的路径常量，只有这些路径常量才会被格式化最终放到 <code>sun.boot.class.path</code> 系统属性中。</p>
+<p>目前这个系统属性在 JDK 9 中已经被移除了，如下图所示：</p>
+<p><img src="https://raw.githubusercontent.com/javadaydayup/pictures/main/20241210141521.png" alt="image.png"></p>
+<p>引导类的路径可以通过 <code>sun.boot.class.path</code> 系统属性或者 <code>-Xbootclasspath</code> JVM 参数设置。</p>
+<h3 id="神奇的-Xbootclasspath-p-参数"><a href="#神奇的-Xbootclasspath-p-参数" class="headerlink" title="神奇的 -Xbootclasspath/p 参数"></a>神奇的 <code>-Xbootclasspath/p</code> 参数</h3><p>除此之外 JVM 还提供了两个参数 <code>-Xbootclasspath/p</code> 和 <code>-Xbootclasspath/a</code>，分别用于在默认的引导类路径前面和后面增加所配置的路径。如下图所示：</p>
+<p><img src="https://raw.githubusercontent.com/javadaydayup/pictures/main/20241210143824.png" alt="image.png"></p>
+<p><img src="https://raw.githubusercontent.com/javadaydayup/pictures/main/20241210144019.png" alt="image.png"></p>
+<p><code>-Xbootclasspath/p</code> 这个参数有点意思，它可以用来修复引导类的 Bug 或者扩展类的功能。</p>
+<p>比如现在把 <code>java.util.Collections</code> 类拷贝出来，给它增加一个方法 <code>extendMethod()</code>，然后打包成 jar 包，如下图所示：</p>
+<p><img src="https://raw.githubusercontent.com/javadaydayup/pictures/main/20241210144957.png" alt="image.png"><br><img src="https://raw.githubusercontent.com/javadaydayup/pictures/main/20241210145227.png" alt="image.png"></p>
+<p>在代码中通过反射的方式调用 <code>extendMethod()</code> 方法，代码如下所示：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Temp</span> &#123;  </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception &#123;  </span><br><span class="line">        <span class="type">Method</span> <span class="variable">method</span> <span class="operator">=</span> Collections.class.getDeclaredMethod(<span class="string">&quot;extendMethod&quot;</span>);  </span><br><span class="line">        method.invoke(<span class="literal">null</span>);  </span><br><span class="line">    &#125;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在执行 java 命令时通过 <code>-Xbootclasspath/p</code> 配置上这个 jar 包。可以看到新增的方法被成功调用了，说明 <code>extend.jar</code> 包中的 <code>Collections</code> 类覆盖了默认的 <code>java.util.Collections</code> 类，因为它在所有的路径前面，所以先被类加载器加载。如下图所示：</p>
+<p><img src="https://raw.githubusercontent.com/javadaydayup/pictures/main/20241210150221.png" alt="image.png"></p>
+<p><img src="https://raw.githubusercontent.com/javadaydayup/pictures/main/20241210162035.png" alt="image.png"></p>
+<p>这个参数在 JDK 9 中也被移除了，取而代之的是 <code>--patch-module</code> 参数，如下图所示：</p>
+<p><img src="https://raw.githubusercontent.com/javadaydayup/pictures/main/20241210162927.png" alt="image.png"></p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/technotes/tools/findingclasses.html">findingclasses</a><br><a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/tutorial/essential/environment/paths.html">PATH and CLASSPATH</a><br><a target="_blank" rel="noopener" href="https://www.oracle.com/java/technologies/javase/9-relnotes.html#JSERN9">JDK 9 Release Notes</a><br><a target="_blank" rel="noopener" href="http://openjdk.java.net/jeps/261">JEP 261</a><br><a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/63420048/how-can-we-overwrite-java-base-java-lang-integer-from-openjdk-11-using-patch-m">How can we overwrite java.base&#x2F;java.lang.Integer from OpenJDK 11 using –patch-module?</a><br><a target="_blank" rel="noopener" href="https://book.douban.com/subject/34907497/">深入理解Java虚拟机</a>  </p>
+
+                
+            </div>
+            <hr/>
+
+            
+
+
+
+            <div class="tag_share" style="display: block;">
+                <div class="post-meta__tag-list" style="display: inline-block;">
+                    
+                        <div class="article-tag">
+                            <span class="chip bg-color">无标签</span>
+                        </div>
+                    
+                </div>
+                <div class="post_share" style="zoom: 80%; width: fit-content; display: inline-block; float: right; margin: -0.15rem 0;">
+                    <link rel="stylesheet" type="text/css" href="/libs/share/css/share.min.css">
+<div id="article-share">
+
+    
+
+    
+
+</div>
+
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+<article id="prenext-posts" class="prev-next articles">
+    <div class="row article-row">
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge left-badge text-color">
+                <i class="fas fa-chevron-left"></i>&nbsp;上一篇</div>
+            <div class="card">
+                <a href="/2024/12/14/windows-10-xia-bian-yi-64-wei-openjdk-8-bing-dan-bu-diao-shi/">
+                    <div class="card-image">
+                        
+                        <img src="/medias/images/covers/compile-jdk8.png" class="responsive-img" alt="Windows 10 下编译 64 位 OpenJDK 8 并单步调试">
+                        
+                        <span class="card-title">Windows 10 下编译 64 位 OpenJDK 8 并单步调试</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            我看你骨骼清奇，是个百年难得的奇才，我这有套 Windows 10 上编译 OpenJDK 8 的方法，就免费传授给你吧！
+                        
+                    </div>
+                    <div class="publish-info">
+                        <span class="publish-date">
+                            <i class="far fa-clock fa-fw icon-date"></i>2024-12-14
+                        </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/Java/" class="post-category">
+                                    Java
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+        
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge right-badge text-color">
+                下一篇&nbsp;<i class="fas fa-chevron-right"></i>
+            </div>
+            <div class="card">
+                <a href="/2024/12/03/yi-ge-bug-jdk-ju-ran-gai-liao-shi-nian/">
+                    <div class="card-image">
+                        
+                        <img src="/medias/images/covers/jdk-to-array-bug.jpg" class="responsive-img" alt="一个 Bug JDK 居然改了十年？">
+                        
+                        <span class="card-title">一个 Bug JDK 居然改了十年？</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            你敢相信么一个简单的Bug，JDK 居然花了十年时间才修改完成。赶快来看看到底是个什么样的 Bug？
+                        
+                    </div>
+                    <div class="publish-info">
+                            <span class="publish-date">
+                                <i class="far fa-clock fa-fw icon-date"></i>2024-12-03
+                            </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/Java/" class="post-category">
+                                    Java
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+        
+    </div>
+</article>
+
+</div>
+
+
+<script>
+    $('#articleContent').on('copy', function (e) {
+        // IE8 or earlier browser is 'undefined'
+        if (typeof window.getSelection === 'undefined') return;
+
+        var selection = window.getSelection();
+        // if the selection is short let's not annoy our users.
+        if (('' + selection).length < Number.parseInt('120')) {
+            return;
+        }
+
+        // create a div outside of the visible area and fill it with the selected text.
+        var bodyElement = document.getElementsByTagName('body')[0];
+        var newdiv = document.createElement('div');
+        newdiv.style.position = 'absolute';
+        newdiv.style.left = '-99999px';
+        bodyElement.appendChild(newdiv);
+        newdiv.appendChild(selection.getRangeAt(0).cloneContents());
+
+        // we need a <pre> tag workaround.
+        // otherwise the text inside "pre" loses all the line breaks!
+        if (selection.getRangeAt(0).commonAncestorContainer.nodeName === 'PRE' || selection.getRangeAt(0).commonAncestorContainer.nodeName === 'CODE') {
+            newdiv.innerHTML = "<pre>" + newdiv.innerHTML + "</pre>";
+        }
+
+        var url = document.location.href;
+        newdiv.innerHTML += '<br />'
+            + '来源: javadaydayup&#39;s blog<br />'
+            + '文章作者: javadaydayup<br />'
+            + '文章链接: <a href="' + url + '">' + url + '</a><br />'
+            + '本文章著作权归作者所有，任何形式的转载都请注明出处。';
+
+        selection.selectAllChildren(newdiv);
+        window.setTimeout(function () {bodyElement.removeChild(newdiv);}, 200);
+    });
+</script>
+
+
+<!-- 代码块功能依赖 -->
+<script type="text/javascript" src="/libs/codeBlock/codeBlockFuction.js"></script>
+
+
+
+<!-- 代码语言 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeLang.js"></script>
+
+
+<!-- 代码块复制 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeCopy.js"></script>
+
+
+<!-- 代码块收缩 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeShrink.js"></script>
+
+
+
+    </div>
+    <div id="toc-aside" class="expanded col l3 hide-on-med-and-down">
+        <div class="toc-widget card" style="background-color: white;">
+            <div class="toc-title"><i class="far fa-list-alt"></i>&nbsp;&nbsp;目录</div>
+            <div id="toc-content"></div>
+        </div>
+    </div>
+</div>
+
+<!-- TOC 悬浮按钮. -->
+
+<div id="floating-toc-btn" class="hide-on-med-and-down">
+    <a class="btn-floating btn-large bg-color">
+        <i class="fas fa-list-ul"></i>
+    </a>
+</div>
+
+
+<script src="/libs/tocbot/tocbot.min.js"></script>
+<script>
+    $(function () {
+        tocbot.init({
+            tocSelector: '#toc-content',
+            contentSelector: '#articleContent',
+            headingsOffset: -($(window).height() * 0.4 - 45),
+            collapseDepth: Number('0'),
+            headingSelector: 'h2, h3, h4'
+        });
+
+        // Set scroll toc fixed.
+        let tocHeight = parseInt($(window).height() * 0.4 - 64);
+        let $tocWidget = $('.toc-widget');
+        $(window).scroll(function () {
+            let scroll = $(window).scrollTop();
+            /* add post toc fixed. */
+            if (scroll > tocHeight) {
+                $tocWidget.addClass('toc-fixed');
+            } else {
+                $tocWidget.removeClass('toc-fixed');
+            }
+        });
+
+        
+        /* 修复文章卡片 div 的宽度. */
+        let fixPostCardWidth = function (srcId, targetId) {
+            let srcDiv = $('#' + srcId);
+            if (srcDiv.length === 0) {
+                return;
+            }
+
+            let w = srcDiv.width();
+            if (w >= 450) {
+                w = w + 21;
+            } else if (w >= 350 && w < 450) {
+                w = w + 18;
+            } else if (w >= 300 && w < 350) {
+                w = w + 16;
+            } else {
+                w = w + 14;
+            }
+            $('#' + targetId).width(w);
+        };
+
+        // 切换TOC目录展开收缩的相关操作.
+        const expandedClass = 'expanded';
+        let $tocAside = $('#toc-aside');
+        let $mainContent = $('#main-content');
+        $('#floating-toc-btn .btn-floating').click(function () {
+            if ($tocAside.hasClass(expandedClass)) {
+                $tocAside.removeClass(expandedClass).hide();
+                $mainContent.removeClass('l9');
+            } else {
+                $tocAside.addClass(expandedClass).show();
+                $mainContent.addClass('l9');
+            }
+            fixPostCardWidth('artDetail', 'prenext-posts');
+        });
+        
+    });
+</script>
+
+    
+
+</main>
+
+
+
+
+    <footer class="page-footer bg-color">
+    
+
+    <div class="container row center-align"
+         style="margin-bottom: 0px !important;">
+        <div class="col s12 m8 l8 copy-right">
+            Copyright&nbsp;&copy;
+            
+                <span id="year">2018-2024</span>
+            
+            <a href="/about" target="_blank">javadaydayup</a>
+            |&nbsp;Powered by&nbsp;<a href="https://hexo.io/" target="_blank">Hexo</a>
+            |&nbsp;Theme&nbsp;<a href="https://github.com/blinkfox/hexo-theme-matery" target="_blank">Matery</a>
+            
+            <br>
+            
+            
+            
+                
+            
+            
+                <span id="busuanzi_container_site_pv">
+                &nbsp;|&nbsp;<i class="far fa-eye"></i>&nbsp;总访问量:&nbsp;
+                    <span id="busuanzi_value_site_pv" class="white-color"></span>
+            </span>
+            
+            
+                <span id="busuanzi_container_site_uv">
+                &nbsp;|&nbsp;<i class="fas fa-users"></i>&nbsp;总访问人数:&nbsp;
+                    <span id="busuanzi_value_site_uv" class="white-color"></span>
+            </span>
+            
+            <br>
+
+            <!-- 运行天数提醒. -->
+            
+            <br>
+            
+        </div>
+        <div class="col s12 m4 l4 social-link social-statis">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</div>
+    </div>
+</footer>
+
+<div class="progress-bar"></div>
+
+
+    <!-- 搜索遮罩框 -->
+<div id="searchModal" class="modal">
+    <div class="modal-content">
+        <div class="search-header">
+            <span class="title"><i class="fas fa-search"></i>&nbsp;&nbsp;搜索</span>
+            <input type="search" id="searchInput" name="s" placeholder="请输入搜索的关键字"
+                   class="search-input">
+        </div>
+        <div id="searchResult"></div>
+    </div>
+</div>
+
+<script type="text/javascript">
+$(function () {
+    var searchFunc = function (path, search_id, content_id) {
+        'use strict';
+        $.ajax({
+            url: path,
+            dataType: "xml",
+            success: function (xmlResponse) {
+                // get the contents from search data
+                var datas = $("entry", xmlResponse).map(function () {
+                    return {
+                        title: $("title", this).text(),
+                        content: $("content", this).text(),
+                        url: $("url", this).text()
+                    };
+                }).get();
+                var $input = document.getElementById(search_id);
+                var $resultContent = document.getElementById(content_id);
+                $input.addEventListener('input', function () {
+                    var str = '<ul class=\"search-result-list\">';
+                    var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+                    $resultContent.innerHTML = "";
+                    if (this.value.trim().length <= 0) {
+                        return;
+                    }
+                    // perform local searching
+                    datas.forEach(function (data) {
+                        var isMatch = true;
+                        var data_title = data.title.trim().toLowerCase();
+                        var data_content = data.content.trim().replace(/<[^>]+>/g, "").toLowerCase();
+                        var data_url = data.url;
+                        data_url = data_url.indexOf('/') === 0 ? data.url : '/' + data_url;
+                        var index_title = -1;
+                        var index_content = -1;
+                        var first_occur = -1;
+                        // only match artiles with not empty titles and contents
+                        if (data_title !== '' && data_content !== '') {
+                            keywords.forEach(function (keyword, i) {
+                                index_title = data_title.indexOf(keyword);
+                                index_content = data_content.indexOf(keyword);
+                                if (index_title < 0 && index_content < 0) {
+                                    isMatch = false;
+                                } else {
+                                    if (index_content < 0) {
+                                        index_content = 0;
+                                    }
+                                    if (i === 0) {
+                                        first_occur = index_content;
+                                    }
+                                }
+                            });
+                        }
+                        // show search results
+                        if (isMatch) {
+                            str += "<li><a href='" + data_url + "' class='search-result-title'>" + data_title + "</a>";
+                            var content = data.content.trim().replace(/<[^>]+>/g, "");
+                            if (first_occur >= 0) {
+                                // cut out 100 characters
+                                var start = first_occur - 20;
+                                var end = first_occur + 80;
+                                if (start < 0) {
+                                    start = 0;
+                                }
+                                if (start === 0) {
+                                    end = 100;
+                                }
+                                if (end > content.length) {
+                                    end = content.length;
+                                }
+                                var match_content = content.substr(start, end);
+                                // highlight all keywords
+                                keywords.forEach(function (keyword) {
+                                    var regS = new RegExp(keyword, "gi");
+                                    match_content = match_content.replace(regS, "<em class=\"search-keyword\">" + keyword + "</em>");
+                                });
+
+                                str += "<p class=\"search-result\">" + match_content + "...</p>"
+                            }
+                            str += "</li>";
+                        }
+                    });
+                    str += "</ul>";
+                    $resultContent.innerHTML = str;
+                });
+            }
+        });
+    };
+
+    searchFunc('/search.xml', 'searchInput', 'searchResult');
+});
+</script>
+
+    <!-- 白天和黑夜主题 -->
+<div class="stars-con">
+    <div id="stars"></div>
+    <div id="stars2"></div>
+    <div id="stars3"></div>  
+</div>
+
+<script>
+    function switchNightMode() {
+        $('<div class="Cuteen_DarkSky"><div class="Cuteen_DarkPlanet"></div></div>').appendTo($('body')),
+        setTimeout(function () {
+            $('body').hasClass('DarkMode') 
+            ? ($('body').removeClass('DarkMode'), localStorage.setItem('isDark', '0'), $('#sum-moon-icon').removeClass("fa-sun").addClass('fa-moon')) 
+            : ($('body').addClass('DarkMode'), localStorage.setItem('isDark', '1'), $('#sum-moon-icon').addClass("fa-sun").removeClass('fa-moon')),
+            
+            setTimeout(function () {
+            $('.Cuteen_DarkSky').fadeOut(1e3, function () {
+                $(this).remove()
+            })
+            }, 2e3)
+        })
+    }
+</script>
+
+    <!-- 回到顶部按钮 -->
+<div id="backTop" class="top-scroll">
+    <a class="btn-floating btn-large waves-effect waves-light" href="#!">
+        <i class="fas fa-arrow-up"></i>
+    </a>
+</div>
+
+
+    <script src="/libs/materialize/materialize.min.js"></script>
+    <script src="/libs/masonry/masonry.pkgd.min.js"></script>
+    <script src="/libs/aos/aos.js"></script>
+    <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
+    <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+    <script src="/js/matery.js"></script>
+
+    
+
+    
+    
+    
+
+    <!-- 雪花特效 -->
+    
+
+    <!-- 鼠标星星特效 -->
+    
+
+    
+
+    <!-- Baidu Analytics -->
+
+    <!-- Baidu Push -->
+
+<script>
+    (function () {
+        var bp = document.createElement('script');
+        var curProtocol = window.location.protocol.split(':')[0];
+        if (curProtocol === 'https') {
+            bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+        } else {
+            bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+        }
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(bp, s);
+    })();
+</script>
+
+    
+    
+    <script async src="/libs/others/busuanzi.pure.mini.js"></script>
+    
+
+    
+
+    
+
+    <!--腾讯兔小巢-->
+    
+    
+
+    
+
+    
+
+    
+    <script src="/libs/instantpage/instantpage.js" type="module"></script>
+    
+
+</body>
+
+</html>

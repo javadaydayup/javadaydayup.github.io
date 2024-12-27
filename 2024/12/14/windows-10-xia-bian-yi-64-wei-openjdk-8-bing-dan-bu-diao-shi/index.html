@@ -1,0 +1,961 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+
+
+<head>
+    <meta charset="utf-8">
+    <meta name="keywords" content="Windows 10 下编译 64 位 OpenJDK 8 并单步调试, javadaydayup&#39;s blog">
+    <meta name="description" content="我看你骨骼清奇，是个百年难得的奇才，我这有套 Windows 10 上编译 OpenJDK 8 的方法，就免费传授给你吧！">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="renderer" content="webkit|ie-stand|ie-comp">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="referrer" content="no-referrer-when-downgrade">
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+
+
+    <title>Windows 10 下编译 64 位 OpenJDK 8 并单步调试 | javadaydayup&#39;s blog</title>
+    <link rel="icon" type="image/png" href="/favicon.png">
+    
+
+
+    <!-- bg-cover style     -->
+
+
+
+<link rel="stylesheet" type="text/css" href="/libs/awesome/css/all.min.css">
+<link rel="stylesheet" type="text/css" href="/libs/materialize/materialize.min.css">
+<link rel="stylesheet" type="text/css" href="/libs/aos/aos.css">
+<link rel="stylesheet" type="text/css" href="/libs/animate/animate.min.css">
+<link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
+<link rel="stylesheet" type="text/css" href="/css/matery.css">
+<link rel="stylesheet" type="text/css" href="/css/my.css">
+<link rel="stylesheet" type="text/css" href="/css/dark.css" media="none" onload="if(media!='all')media='all'">
+
+
+
+
+    <link rel="stylesheet" href="/libs/tocbot/tocbot.css">
+    <link rel="stylesheet" href="/css/post.css">
+
+
+
+
+    
+
+
+
+    <script src="/libs/jquery/jquery-3.6.0.min.js"></script>
+
+<meta name="generator" content="Hexo 7.3.0"><link rel="alternate" href="/atom.xml" title="javadaydayup's blog" type="application/atom+xml">
+</head>
+
+
+<body>
+    <header class="navbar-fixed">
+    <nav id="headNav" class="bg-color nav-transparent">
+        <div id="navContainer" class="nav-wrapper container">
+            <div class="brand-logo">
+                <a href="/" class="waves-effect waves-light">
+                    
+                    <img src="/medias/logo.jpg" class="logo-img" alt="LOGO">
+                    
+                    <span class="logo-span">javadaydayup&#39;s blog</span>
+                </a>
+            </div>
+            
+
+<a href="#" data-target="mobile-nav" class="sidenav-trigger button-collapse"><i class="fas fa-bars"></i></a>
+<ul class="right nav-menu">
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/" class="waves-effect waves-light">
+      
+      <i class="fas fa-home" style="zoom: 0.6;"></i>
+      
+      <span>首页</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/categories" class="waves-effect waves-light">
+      
+      <i class="fas fa-bookmark" style="zoom: 0.6;"></i>
+      
+      <span>分类</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/archives" class="waves-effect waves-light">
+      
+      <i class="fas fa-archive" style="zoom: 0.6;"></i>
+      
+      <span>归档</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/about" class="waves-effect waves-light">
+      
+      <i class="fas fa-user-circle" style="zoom: 0.6;"></i>
+      
+      <span>关于</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/friends" class="waves-effect waves-light">
+      
+      <i class="fas fa-address-book" style="zoom: 0.6;"></i>
+      
+      <span>友情链接</span>
+    </a>
+    
+  </li>
+  
+  <li>
+    <a href="#searchModal" class="modal-trigger waves-effect waves-light">
+      <i id="searchIcon" class="fas fa-search" title="搜索" style="zoom: 0.85;"></i>
+    </a>
+  </li>
+  <li>
+    <a href="javascript:;" class="waves-effect waves-light" onclick="switchNightMode()" title="深色/浅色模式" >
+      <i id="sum-moon-icon" class="fas fa-sun" style="zoom: 0.85;"></i>
+    </a>
+  </li>
+</ul>
+
+
+<div id="mobile-nav" class="side-nav sidenav">
+
+    <div class="mobile-head bg-color">
+        
+        <img src="/medias/logo.jpg" class="logo-img circle responsive-img">
+        
+        <div class="logo-name">javadaydayup&#39;s blog</div>
+        <div class="logo-desc">
+            
+            Never really desperate, only the lost of the soul.
+            
+        </div>
+    </div>
+
+    <ul class="menu-list mobile-menu-list">
+        
+        <li class="m-nav-item">
+	  
+		<a href="/" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-home"></i>
+			
+			首页
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/categories" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-bookmark"></i>
+			
+			分类
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/archives" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-archive"></i>
+			
+			归档
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/about" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-user-circle"></i>
+			
+			关于
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/friends" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-address-book"></i>
+			
+			友情链接
+		</a>
+          
+        </li>
+        
+        
+    </ul>
+</div>
+
+
+        </div>
+
+        
+    </nav>
+
+</header>
+
+    
+
+
+
+<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/images/covers/compile-jdk8.png')">
+    <div class="container" style="right: 0px;left: 0px;">
+        <div class="row">
+            <div class="col s12 m12 l12">
+                <div class="brand">
+                    <h1 class="description center-align post-title">Windows 10 下编译 64 位 OpenJDK 8 并单步调试</h1>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<main class="post-container content">
+
+    
+    <div class="row">
+    <div id="main-content" class="col s12 m12 l9">
+        <!-- 文章内容详情 -->
+<div id="artDetail">
+    <div class="card">
+        <div class="card-content article-info">
+            <div class="row tag-cate">
+                <div class="col s7">
+                    
+                          <div class="article-tag">
+                            <span class="chip bg-color">无标签</span>
+                          </div>
+                    
+                </div>
+                <div class="col s5 right-align">
+                    
+                    <div class="post-cate">
+                        <i class="fas fa-bookmark fa-fw icon-category"></i>
+                        
+                            <a href="/categories/Java/" class="post-category">
+                                Java
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+            </div>
+
+            <div class="post-info">
+                
+                <div class="post-date info-break-policy">
+                    <i class="far fa-calendar-minus fa-fw"></i>发布日期:&nbsp;&nbsp;
+                    2024-12-14
+                </div>
+                
+
+                
+
+                
+
+                
+
+                
+            </div>
+        </div>
+        <hr class="clearfix">
+
+        
+
+        
+
+        <div class="card-content article-card-content">
+            <div id="articleContent">
+                <h1 id="Windows-10-下编译-64-位-OpenJDK-8"><a href="#Windows-10-下编译-64-位-OpenJDK-8" class="headerlink" title="Windows 10 下编译 64 位 OpenJDK 8"></a>Windows 10 下编译 64 位 OpenJDK 8</h1><h2 id="软件版本"><a href="#软件版本" class="headerlink" title="软件版本"></a>软件版本</h2><ul>
+<li><p>操作系统：Windows 10<br><img src="https://raw.githubusercontent.com/javadaydayup/pictures/main/20241211110515.png" alt="image.png"></p>
+</li>
+<li><p>Cygwin：3.5.4-1<br><img src="https://raw.githubusercontent.com/javadaydayup/pictures/main/20241211110622.png" alt="image.png"></p>
+</li>
+<li><p>Visual Studio：2010 英文版<br> <img src="https://raw.githubusercontent.com/javadaydayup/pictures/main/20241212112106.png" alt="image.png"></p>
+</li>
+<li><p>freetype: 2.7<br><img src="https://raw.githubusercontent.com/javadaydayup/pictures/main/20241211112927.png" alt="image.png"></p>
+</li>
+<li><p>Boot JDK：7<br><img src="https://raw.githubusercontent.com/javadaydayup/pictures/main/20241214130139.png" alt="image"></p>
+</li>
+<li><p>编译的 OpenJDK 版本：8<br><img src="https://raw.githubusercontent.com/javadaydayup/pictures/main/20241211111225.png" alt="image.png"></p>
+</li>
+</ul>
+<h2 id="安装-boot-JDK"><a href="#安装-boot-JDK" class="headerlink" title="安装 boot JDK"></a>安装 boot JDK</h2><p>从<a target="_blank" rel="noopener" href="https://archive.org/details/jdk-7u80-windows-x64_201809">下载链接</a>下载 JDK，然后在 Windows 上安装。安装完成后配置 <code>JAVE_HOME</code> 环境变量，如下图所示：</p>
+<p><img src="https://raw.githubusercontent.com/javadaydayup/pictures/main/bootjdk02.png" alt="bootjdk02.png"></p>
+<p>在已有的 Path 环境变量加入 %JAVA_HOME%\bin ，如下图所示：</p>
+<p><img src="https://raw.githubusercontent.com/javadaydayup/pictures/main/bootjdk03.png" alt="bootjdk03.png"></p>
+<p>配置完成后在 cmd 中执行 <code>java -version</code> 命令，可以看到对应的版本信息，则证明已配置好，如下图所示：<br> <img src="https://raw.githubusercontent.com/javadaydayup/pictures/main/20241214130139.png" alt="image"></p>
+<h2 id="安装-Cygwin"><a href="#安装-Cygwin" class="headerlink" title="安装 Cygwin"></a>安装 Cygwin</h2><p>从<a target="_blank" rel="noopener" href="https://www.cygwin.com/install.html">下载链接</a>下载安装程序，然后在 Windows 上安装。<br>设置安装的路径，这里设置的是 E:\cygwin64，如下图所示：</p>
+<p><img src="https://raw.githubusercontent.com/javadaydayup/pictures/main/cygwin01.png" alt="cygwin01.png"></p>
+<p>选择要额外安装的命令，包括：<code>binutils</code>，<code>cpio</code>，<code>m4</code>，<code>make</code>，<code>procps-ng</code>，<code>unzip</code>，<code>zip</code>。<br>选择安装 <code>binutils</code> 命令，如下图所示：</p>
+<p><img src="https://raw.githubusercontent.com/javadaydayup/pictures/main/cygwin02.png" alt="cygwin02.png"></p>
+<p>选择安装 <code>cpio</code> 命令，如下图所示：</p>
+<p><img src="https://raw.githubusercontent.com/javadaydayup/pictures/main/cygwin03.png" alt="cygwin03.png"></p>
+<p>选择安装 <code>m4</code> 命令，如下图所示：</p>
+<p><img src="https://raw.githubusercontent.com/javadaydayup/pictures/main/cygwin04.png" alt="cygwin04.png"></p>
+<p>选择安装 <code>make</code> 命令，如下图所示：</p>
+<p><img src="https://raw.githubusercontent.com/javadaydayup/pictures/main/cygwin05.png"></p>
+<p>选择安装 <code>procps-ng</code> 命令，如下图所示：</p>
+<p><img src="https://raw.githubusercontent.com/javadaydayup/pictures/main/cygwin06.png" alt="cygwin06.png"></p>
+<p>选择安装 <code>unzip</code> 命令，如下图所示：</p>
+<p><img src="https://raw.githubusercontent.com/javadaydayup/pictures/main/cygwin07.png" alt="cygwin07.png"></p>
+<p>选择安装 <code>zip</code> 命令，如下图所示：</p>
+<p><img src="https://raw.githubusercontent.com/javadaydayup/pictures/main/cygwin08.png" alt="cygwin08.png"></p>
+<p>安装完成后在已有的 Path 环境变量加入 E:\cygwin64\bin 路径，如下图所示： </p>
+<p><img src="https://raw.githubusercontent.com/javadaydayup/pictures/main/20241212125610.png" alt="image.png"></p>
+<h2 id="安装-VS-2010"><a href="#安装-VS-2010" class="headerlink" title="安装 VS 2010"></a>安装 VS 2010</h2><p>从<a target="_blank" rel="noopener" href="https://archive.org/details/microsoft-visual-studio-2010-ultimate">下载链接</a>下载 VS 2010 英文版（<strong>这里一定要用英文版</strong>），然后在 Windows 上安装。</p>
+<p>安装的时候设置安装路径，<strong>注意路径中不能有空格</strong>，如下图所示：</p>
+<p><img src="https://raw.githubusercontent.com/javadaydayup/pictures/main/vs01.png" alt="vs01.png"></p>
+<p>安装的特性只需要勾选 Visual C++，如下图所示：</p>
+<p><img src="https://raw.githubusercontent.com/javadaydayup/pictures/main/vs02.png" alt="vs02.png"></p>
+<p>在已有的 Path 环境变量加入 E:\MicrosoftVisualStudio10.0\VC\bin 路径，如下图所示： </p>
+<p><img src="https://raw.githubusercontent.com/javadaydayup/pictures/main/20241212125931.png" alt="image.png"></p>
+<h2 id="下载并编译-freetype"><a href="#下载并编译-freetype" class="headerlink" title="下载并编译 freetype"></a>下载并编译 freetype</h2><p>从<a target="_blank" rel="noopener" href="https://sourceforge.net/projects/freetype/files/freetype2/2.7/">下载链接</a>下载 freetype 源码并解压。</p>
+<p>然后打开 VS 2010，点击 File-&gt;Open-&gt;Project&#x2F;Solution，选择 freetype 解压路径下的 builds\windows\vc2010\freetype.sln 文件并打开，如下图所示：</p>
+<p><img src="https://raw.githubusercontent.com/javadaydayup/pictures/main/vs03.png" alt="vs03.png"></p>
+<p><img src="https://raw.githubusercontent.com/javadaydayup/pictures/main/vs04.png" alt="vs04.png"></p>
+<p>右键后点击 Properties，如下图所示：</p>
+<p><img src="https://raw.githubusercontent.com/javadaydayup/pictures/main/vs06.png" alt="vs06.png"></p>
+<p><strong>配置编译成静态链接库</strong>，选择 Configuration 为 Release Multithreaded，Platform 选择 x64， Target Name 修改为 freetype，Target Extension 修改为 .lib，Configuration Type 修改为 Static libraty(.lib)，如下图所示：</p>
+<p><img src="https://raw.githubusercontent.com/javadaydayup/pictures/main/vs07.png" alt="vs07.png"></p>
+<p>点击 Build-&gt; Build Solution 编译静态链接库，编译完成后在 freetype 解压路径下的 objs\vc2010\x64 目录下会生成 freetype.lib 文件，如下图所示：</p>
+<p><img src="https://raw.githubusercontent.com/javadaydayup/pictures/main/20241212141006.png" alt="image.png"></p>
+<p><img src="https://raw.githubusercontent.com/javadaydayup/pictures/main/vs09.png"></p>
+<p><strong>配置编译静态链接库</strong>，主要是 Target Extension 修改为 .dll，Configuration Type 修改为 Dynamic Library(.dll)，如下图所示：</p>
+<p><img src="https://raw.githubusercontent.com/javadaydayup/pictures/main/vs10.png" alt="vs10.png"></p>
+<p>点击 Build-&gt; Build Solution 编译动态链接库，编译完成后在 freetype 解压路径下的 objs\vc2010\x64 目录会生成 freetype.dll 文件，如下图所示：</p>
+<p><img src="https://raw.githubusercontent.com/javadaydayup/pictures/main/vs11.png" alt="vs11.png"></p>
+<p>然后在 freetype 解压路径下创建 lib 目录，把 freetype.lib 和 freetype.dll 两个文件拷贝到这个 lib 目录下，如下图所示：</p>
+<p><img src="https://raw.githubusercontent.com/javadaydayup/pictures/main/vs12.png" alt="vs12.png"></p>
+<h2 id="下载并编译OpenJDK-8"><a href="#下载并编译OpenJDK-8" class="headerlink" title="下载并编译OpenJDK 8"></a>下载并编译OpenJDK 8</h2><p>从<a target="_blank" rel="noopener" href="https://github.com/openjdk/jdk/archive/refs/tags/jdk8-b120.zip">下载链接</a>下载 OpenJDK 8 的源码并解压。如果你使用的软件版本和本文的软件版本一致，则推荐下载<a target="_blank" rel="noopener" href="https://github.com/javadaydayup/jdk8">替换文件</a> 替换到解压后相对应的目录下，不然编译的时候会遇到报错。不一致的话则手动修改解压后的文件，见后面的<a href="#%E7%BC%96%E8%AF%91%E9%81%87%E5%88%B0%E7%9A%84%E9%97%AE%E9%A2%98%E5%8F%8A%E8%A7%A3%E5%86%B3%E5%8A%9E%E6%B3%95">编译遇到的问题及解决办法</a>。</p>
+<p>在 OpenJDK 8 的解压路径下执行 <code>./configure --with-freetype=&#39;/cygdrive/e/freetype-2.7&#39; --with-target-bits=64 --enable-debug -disable-ccache</code> 命令，其中 <code>--with-freetype</code> 替换为实际的 freetype 的路径，执行成功后的提示如下图所示：</p>
+<p><img src="https://raw.githubusercontent.com/javadaydayup/pictures/main/20241212143101.png" alt="image.png"></p>
+<p><img src="https://raw.githubusercontent.com/javadaydayup/pictures/main/configture01.png" alt="configture01.png"></p>
+<p>然后执行 <code>make all</code> 命令开始编译，等待编译结束，编译成功后会在 OpenJDK 8 解压路径下的build 目录生成 windows-x86_64-normal-server-fastdebug 目录，编译后的 JDK 就在这个目录下，如下图所示：</p>
+<p><img src="https://raw.githubusercontent.com/javadaydayup/pictures/main/20241212110757.png" alt="image.png"></p>
+<p><img src="https://raw.githubusercontent.com/javadaydayup/pictures/main/20241212111252.png" alt="image.png"></p>
+<p>进入到 build\windows-x86_64-normal-server-fastdebug\jdk\bin 目录，执行 <code>java -version</code>，就可以看到输出如下图所示：</p>
+<p><img src="https://raw.githubusercontent.com/javadaydayup/pictures/main/20241212111456.png" alt="image.png"></p>
+<p>这个时候就拥有了一个在自己电脑上编译出来的 JDK 8 了。</p>
+<h2 id="编译遇到的问题及解决办法"><a href="#编译遇到的问题及解决办法" class="headerlink" title="编译遇到的问题及解决办法"></a>编译遇到的问题及解决办法</h2><h3 id="Your-cygwin-is-too-old"><a href="#Your-cygwin-is-too-old" class="headerlink" title="Your cygwin is too old"></a>Your cygwin is too old</h3><p>执行 <code>./configure --with-freetype=&#39;/cygdrive/e/freetype-2.7&#39; --with-target-bits=64 --enable-debug -disable-ccache</code> 命令后可能会遇到报错提示： Your cygwin is too old.，如下图所示：</p>
+<p><img src="https://raw.githubusercontent.com/javadaydayup/pictures/main/20241211175600.png" alt="image.png"></p>
+<p>这个是因为 OpenJDK 8 解压路径下的 common\autoconf\generated-configure.sh 脚本有 Bug ，这个脚本中把 Cygwin 的版本写死了，确保你的版本大于 1.7 之后，把这里的版本修改为你自己的版本号即可。如果你的版本和本文使用的版本一致，则直接可以下载<a target="_blank" rel="noopener" href="https://github.com/javadaydayup/jdk8">替换文件</a>后替换即可，如下图所示：</p>
+<p><img src="https://raw.githubusercontent.com/javadaydayup/pictures/main/20241211180059.png" alt="image.png"></p>
+<p><img src="https://raw.githubusercontent.com/javadaydayup/pictures/main/20241212143623.png" alt="image.png"></p>
+<h3 id="time-is-more-than-10-years-from-present"><a href="#time-is-more-than-10-years-from-present" class="headerlink" title="time is more than 10 years from present"></a>time is more than 10 years from present</h3><p>执行 <code>make all</code> 命令后，可能会遇到报错提示： time is more than 10 years from present，如下图所示： </p>
+<p><img src="https://raw.githubusercontent.com/javadaydayup/pictures/main/compileerror01.png" alt="compileerror01.png"></p>
+<p>这个是因为 OpenJDK 8 解压路径下的  jdk\make\src\classes\build\tools\generatecurrencydata\GenerateCurrencyData.java 这个类中校验了不能超过 10 年。可以手动将这里的 10 修改为 100， 或者直接可以下载<a target="_blank" rel="noopener" href="https://github.com/javadaydayup/jdk8">替换文件</a>后替换即可。替换完成后执行 <code>make clean</code> 命令清理，然后再执行 <code>make all</code> 命令，如下图所示：</p>
+<p><img src="https://raw.githubusercontent.com/javadaydayup/pictures/main/20241211202255.png" alt="image.png"><br><img src="https://raw.githubusercontent.com/javadaydayup/pictures/main/20241211202520.png" alt="image.png"></p>
+<h3 id="images-only"><a href="#images-only" class="headerlink" title="images-only"></a>images-only</h3><p>执行 <code>make all</code> 命令后，可能会遇到报错提示： Main.gmk:136: images-only] Error 2 ，如下图所示：</p>
+<p><img src="https://raw.githubusercontent.com/javadaydayup/pictures/main/20241211211737.png" alt="image.png"></p>
+<p>这个是因为 OpenJDK 8 解压路径下的 jdk\make\CreateJars.gmk 文件有两处地方少了回车符号，如下图所示：</p>
+<p><img src="https://raw.githubusercontent.com/javadaydayup/pictures/main/20241211212904.png" alt="image.png"></p>
+<p>可以手动给这两处增加回车符号，方法为在 insert 模式下，先按 Ctrl + V ，然后再按 Ctrl + M，或者直接可以下载<a target="_blank" rel="noopener" href="https://github.com/javadaydayup/jdk8">替换文件</a>后替换即可。替换完成后执行 <code>make clean</code> 命令清理，然后再执行 <code>make all</code> 命令编译，如下图所示：</p>
+<p><img src="https://raw.githubusercontent.com/javadaydayup/pictures/main/20241212094225.png"></p>
+<p>编译成功后输出如下图所示：</p>
+<p><img src="https://raw.githubusercontent.com/javadaydayup/pictures/main/20241212110757.png" alt="image.png"></p>
+<h1 id="Windows-10-下单步调试-OpenJDK-8"><a href="#Windows-10-下单步调试-OpenJDK-8" class="headerlink" title="Windows 10 下单步调试 OpenJDK 8"></a>Windows 10 下单步调试 OpenJDK 8</h1><h2 id="创建调试项目"><a href="#创建调试项目" class="headerlink" title="创建调试项目"></a>创建调试项目</h2><p>修改 OpenJDK 8 解压路径下的 hotspot\make\windows\create.bat 脚本中的内容，将脚本中默认的 cygwin64 的安装路径修改为实际的安装路径，如下图所示：</p>
+<p><img src="https://raw.githubusercontent.com/javadaydayup/pictures/main/20241212112321.png" alt="image.png"></p>
+<p><img src="https://raw.githubusercontent.com/javadaydayup/pictures/main/20241212112708.png" alt="image.png"></p>
+<p><img src="https://raw.githubusercontent.com/javadaydayup/pictures/main/20241212124334.png" alt="image.png"></p>
+<p>进入到 VS 2010 安装路径下的 VC\bin\amd64，执行 <code>vcvars64.bat</code>，执行完成后<strong>不退出这个命令行</strong>，如下图所示：</p>
+<p><img src="https://raw.githubusercontent.com/javadaydayup/pictures/main/20241212125200.png" alt="image.png"></p>
+<p>在同一个命令行进入到 OpenJDK 8 解压路径下的 hotspot\make\windows 目录，执行 <code>create.bat E:\jdk-jdk8-b120\jdk</code> 命令创建 VS 2010 项目文件，如下图所示：</p>
+<p><img src="https://raw.githubusercontent.com/javadaydayup/pictures/main/20241212131015.png" alt="image.png"></p>
+<p><img src="https://raw.githubusercontent.com/javadaydayup/pictures/main/20241212131131.png" alt="image.png"></p>
+<h2 id="配置单步调试"><a href="#配置单步调试" class="headerlink" title="配置单步调试"></a>配置单步调试</h2><p>将 OpenJDK 8 解压路径下 build\windows-x86_64-normal-server-fastdebug\jdk\bin\java.diz 解压到所在的路径下，如下图所示：</p>
+<p><img src="https://raw.githubusercontent.com/javadaydayup/pictures/main/20241212150003.png" alt="image.png"></p>
+<p>用 VS 2010 打开 OpenJDK 8 解压路径下的 hotspot\build\vs-amd64\jvm.vcxproj 文件，如下图所示：</p>
+<p><img src="https://raw.githubusercontent.com/javadaydayup/pictures/main/20241212131354.png" alt="image.png"></p>
+<p>右键后点击 Properties，配置 Debugging 参数，Configuration 选择 compiler2_fastdebug，Platform 选择 x64，Command 配置编译出来的 java.exe ，Command Arguments 增加 -version 参数，这里相当于就是配置执行 <code>java -version</code> 命令，Environment 配置 JAVA_HOME 为编译出来的 JDK 路径，如下图所示：</p>
+<p><img src="https://raw.githubusercontent.com/javadaydayup/pictures/main/20241212132446.png" alt="image.png"></p>
+<p>配置完成后，按 F7 重新 build 一下项目，如下图所示：</p>
+<p><img src="https://raw.githubusercontent.com/javadaydayup/pictures/main/20241212132620.png" alt="image.png"></p>
+<p><img src="https://raw.githubusercontent.com/javadaydayup/pictures/main/20241212133827.png" alt="image.png"></p>
+<p>在 OpenJDK 8 解压路径下 share&#x2F;vm&#x2F;runtime&#x2F;arguments.cpp 中的 <code>init_system_properties()</code> 打个断点，如下图所示：</p>
+<p><img src="https://raw.githubusercontent.com/javadaydayup/pictures/main/20241212133334.png" alt="image.png"></p>
+<p>点击调试按钮后，代码在断点处停下，如下图所示：</p>
+<p><img src="https://raw.githubusercontent.com/javadaydayup/pictures/main/20241212134106.png" alt="image.png"></p>
+<h2 id="单步调试遇到的问题及解决办法"><a href="#单步调试遇到的问题及解决办法" class="headerlink" title="单步调试遇到的问题及解决办法"></a>单步调试遇到的问题及解决办法</h2><h3 id="创建调试项目报错"><a href="#创建调试项目报错" class="headerlink" title="创建调试项目报错"></a>创建调试项目报错</h3><p>执行 <code>create.bat</code> 脚本报如下错误：<br>The code execution cannot proceed because mspdb 100.dll was not found. Reinstalling the program may fix this problem.</p>
+<p><img src="https://raw.githubusercontent.com/javadaydayup/pictures/main/createproject01.png" alt="createproject01.png"></p>
+<p>是因为没有在同一个命令行执行 <code>vcvars64.bat</code> 见 <a href="#%E5%88%9B%E5%BB%BA%E8%B0%83%E8%AF%95%E9%A1%B9%E7%9B%AE">创建调试项目</a></p>
+<h3 id="单步调试报错"><a href="#单步调试报错" class="headerlink" title="单步调试报错"></a>单步调试报错</h3><p>点击 Debug 按钮启动调试报错如下：<br>‘java.exe’: Loaded ‘E:\openjdk8\openjdk\build\windows-x86_64-normal-server-fastdebug\jdk\bin\java.exe’, Symbols loaded.<br>‘java.exe’: Loaded ‘C:\Windows\System32\ntdll.dll’, Cannot find or open the PDB file<br>‘java.exe’: Loaded ‘C:\Windows\System32\kernel32.dll’, Cannot find or open the PDB file<br>‘java.exe’: Loaded ‘C:\Windows\System32\KernelBase.dll’, Cannot find or open the PDB file<br>‘java.exe’: Loaded ‘C:\Windows\System32\apphelp.dll’, Cannot find or open the PDB file<br>‘java.exe’: Loaded ‘C:\Windows\System32\advapi32.dll’, Cannot find or open the PDB file<br>‘java.exe’: Loaded ‘C:\Windows\System32\msvcrt.dll’, Cannot find or open the PDB file<br>‘java.exe’: Loaded ‘C:\Windows\System32\sechost.dll’, Cannot find or open the PDB file<br>‘java.exe’: Loaded ‘C:\Windows\System32\rpcrt4.dll’, Cannot find or open the PDB file<br>‘java.exe’: Loaded ‘C:\Windows\System32\user32.dll’, Cannot find or open the PDB file<br>‘java.exe’: Loaded ‘C:\Windows\System32\win32u.dll’, Cannot find or open the PDB file<br>‘java.exe’: Loaded ‘C:\Windows\System32\gdi32.dll’, Cannot find or open the PDB file<br>‘java.exe’: Loaded ‘C:\Windows\System32\gdi32full.dll’, Cannot find or open the PDB file<br>‘java.exe’: Loaded ‘C:\Windows\System32\msvcp_win.dll’, Cannot find or open the PDB file<br>‘java.exe’: Loaded ‘C:\Windows\System32\ucrtbase.dll’, Cannot find or open the PDB file<br>‘java.exe’: Loaded ‘C:\Windows\WinSxS\amd64_microsoft.windows.common-controls_6595b64144ccf1df_6.0.19041.1110_none_60b5254171f9507e\comctl32.dll’, Cannot find or open the PDB file<br>‘java.exe’: Loaded ‘C:\Windows\System32\imm32.dll’, Cannot find or open the PDB file<br>The thread ‘Win64 Thread’ (0x1048) has exited with code 4 (0x4).<br>The thread ‘Win64 Thread’ (0x1efc) has exited with code 4 (0x4).<br>The program ‘[2308] java.exe: Native’ has exited with code 4 (0x4).</p>
+<p><img src="https://raw.githubusercontent.com/javadaydayup/pictures/main/debug01.png" alt="debug01.png"></p>
+<p>这个需要重新 build 一下项目，见<a href="#%E9%85%8D%E7%BD%AE%E5%8D%95%E6%AD%A5%E8%B0%83%E8%AF%95">配置单步调试</a></p>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/jpfss/p/11641045.html#2images_108">Win10下编译OpenJDK8</a><br><a target="_blank" rel="noopener" href="https://yfsyfs.github.io/2019/07/11/Windows10%E4%B8%8B%E7%BC%96%E8%AF%91openjdk8/">Windows10下编译openjdk8</a><br><a target="_blank" rel="noopener" href="https://blog.csdn.net/u012557298/article/details/135716675">编译openjdk &amp;&amp; 调试java</a><br><a target="_blank" rel="noopener" href="https://yfsyfs.github.io/2019/07/11/Windows10%E4%B8%8Bvs2010%E5%8D%95%E6%AD%A5%E8%B0%83%E8%AF%95jvm/">Windows10下vs2010单步调试jvm</a><br><a target="_blank" rel="noopener" href="https://blog.csdn.net/LPWSTR/article/details/78840188">Java虚拟机原理分析之Win7下VS2010编译OpenJDK8与单步调试HotSpot VM过程详细记录</a><br><a target="_blank" rel="noopener" href="https://github.com/openjdk/jdk8u-dev/blob/master/doc/building.md">building open jdk 8</a>  </p>
+
+                
+            </div>
+            <hr/>
+
+            
+
+
+
+            <div class="tag_share" style="display: block;">
+                <div class="post-meta__tag-list" style="display: inline-block;">
+                    
+                        <div class="article-tag">
+                            <span class="chip bg-color">无标签</span>
+                        </div>
+                    
+                </div>
+                <div class="post_share" style="zoom: 80%; width: fit-content; display: inline-block; float: right; margin: -0.15rem 0;">
+                    <link rel="stylesheet" type="text/css" href="/libs/share/css/share.min.css">
+<div id="article-share">
+
+    
+
+    
+
+</div>
+
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+<article id="prenext-posts" class="prev-next articles">
+    <div class="row article-row">
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge left-badge text-color">
+                <i class="fas fa-chevron-left"></i>&nbsp;上一篇</div>
+            <div class="card">
+                <a href="/2024/12/24/java-zhong-de-zhe-ge-jue-dui-zhi-you-dian-bu-jue-dui-a/">
+                    <div class="card-image">
+                        
+                        <img src="/medias/images/covers/absolute-value.png" class="responsive-img" alt="Java 中的这个绝对值有点不绝对啊！">
+                        
+                        <span class="card-title">Java 中的这个绝对值有点不绝对啊！</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            Java 中的 Math.abs() 方法居然不绝对，这个坑你踩过么？快来看看这到底是个什么坑吧！！！
+                        
+                    </div>
+                    <div class="publish-info">
+                        <span class="publish-date">
+                            <i class="far fa-clock fa-fw icon-date"></i>2024-12-24
+                        </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/Java/" class="post-category">
+                                    Java
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+        
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge right-badge text-color">
+                下一篇&nbsp;<i class="fas fa-chevron-right"></i>
+            </div>
+            <div class="card">
+                <a href="/2024/12/11/na-li-you-class-gao-su-wo/">
+                    <div class="card-image">
+                        
+                        <img src="/medias/images/covers/where-are-classes.webp" class="responsive-img" alt="哪里有 class 告诉我？">
+                        
+                        <span class="card-title">哪里有 class 告诉我？</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            本文介绍用户类路径的设置的参数以及不同设置方法的优先级以及从 JVM 源码角度分析了引导类路径是如何设置的，让你对不同的类路径有更深刻的理解。
+                        
+                    </div>
+                    <div class="publish-info">
+                            <span class="publish-date">
+                                <i class="far fa-clock fa-fw icon-date"></i>2024-12-11
+                            </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/Java/" class="post-category">
+                                    Java
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+        
+    </div>
+</article>
+
+</div>
+
+
+<script>
+    $('#articleContent').on('copy', function (e) {
+        // IE8 or earlier browser is 'undefined'
+        if (typeof window.getSelection === 'undefined') return;
+
+        var selection = window.getSelection();
+        // if the selection is short let's not annoy our users.
+        if (('' + selection).length < Number.parseInt('120')) {
+            return;
+        }
+
+        // create a div outside of the visible area and fill it with the selected text.
+        var bodyElement = document.getElementsByTagName('body')[0];
+        var newdiv = document.createElement('div');
+        newdiv.style.position = 'absolute';
+        newdiv.style.left = '-99999px';
+        bodyElement.appendChild(newdiv);
+        newdiv.appendChild(selection.getRangeAt(0).cloneContents());
+
+        // we need a <pre> tag workaround.
+        // otherwise the text inside "pre" loses all the line breaks!
+        if (selection.getRangeAt(0).commonAncestorContainer.nodeName === 'PRE' || selection.getRangeAt(0).commonAncestorContainer.nodeName === 'CODE') {
+            newdiv.innerHTML = "<pre>" + newdiv.innerHTML + "</pre>";
+        }
+
+        var url = document.location.href;
+        newdiv.innerHTML += '<br />'
+            + '来源: javadaydayup&#39;s blog<br />'
+            + '文章作者: javadaydayup<br />'
+            + '文章链接: <a href="' + url + '">' + url + '</a><br />'
+            + '本文章著作权归作者所有，任何形式的转载都请注明出处。';
+
+        selection.selectAllChildren(newdiv);
+        window.setTimeout(function () {bodyElement.removeChild(newdiv);}, 200);
+    });
+</script>
+
+
+<!-- 代码块功能依赖 -->
+<script type="text/javascript" src="/libs/codeBlock/codeBlockFuction.js"></script>
+
+
+
+<!-- 代码语言 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeLang.js"></script>
+
+
+<!-- 代码块复制 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeCopy.js"></script>
+
+
+<!-- 代码块收缩 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeShrink.js"></script>
+
+
+
+    </div>
+    <div id="toc-aside" class="expanded col l3 hide-on-med-and-down">
+        <div class="toc-widget card" style="background-color: white;">
+            <div class="toc-title"><i class="far fa-list-alt"></i>&nbsp;&nbsp;目录</div>
+            <div id="toc-content"></div>
+        </div>
+    </div>
+</div>
+
+<!-- TOC 悬浮按钮. -->
+
+<div id="floating-toc-btn" class="hide-on-med-and-down">
+    <a class="btn-floating btn-large bg-color">
+        <i class="fas fa-list-ul"></i>
+    </a>
+</div>
+
+
+<script src="/libs/tocbot/tocbot.min.js"></script>
+<script>
+    $(function () {
+        tocbot.init({
+            tocSelector: '#toc-content',
+            contentSelector: '#articleContent',
+            headingsOffset: -($(window).height() * 0.4 - 45),
+            collapseDepth: Number('0'),
+            headingSelector: 'h2, h3, h4'
+        });
+
+        // Set scroll toc fixed.
+        let tocHeight = parseInt($(window).height() * 0.4 - 64);
+        let $tocWidget = $('.toc-widget');
+        $(window).scroll(function () {
+            let scroll = $(window).scrollTop();
+            /* add post toc fixed. */
+            if (scroll > tocHeight) {
+                $tocWidget.addClass('toc-fixed');
+            } else {
+                $tocWidget.removeClass('toc-fixed');
+            }
+        });
+
+        
+        /* 修复文章卡片 div 的宽度. */
+        let fixPostCardWidth = function (srcId, targetId) {
+            let srcDiv = $('#' + srcId);
+            if (srcDiv.length === 0) {
+                return;
+            }
+
+            let w = srcDiv.width();
+            if (w >= 450) {
+                w = w + 21;
+            } else if (w >= 350 && w < 450) {
+                w = w + 18;
+            } else if (w >= 300 && w < 350) {
+                w = w + 16;
+            } else {
+                w = w + 14;
+            }
+            $('#' + targetId).width(w);
+        };
+
+        // 切换TOC目录展开收缩的相关操作.
+        const expandedClass = 'expanded';
+        let $tocAside = $('#toc-aside');
+        let $mainContent = $('#main-content');
+        $('#floating-toc-btn .btn-floating').click(function () {
+            if ($tocAside.hasClass(expandedClass)) {
+                $tocAside.removeClass(expandedClass).hide();
+                $mainContent.removeClass('l9');
+            } else {
+                $tocAside.addClass(expandedClass).show();
+                $mainContent.addClass('l9');
+            }
+            fixPostCardWidth('artDetail', 'prenext-posts');
+        });
+        
+    });
+</script>
+
+    
+
+</main>
+
+
+
+
+    <footer class="page-footer bg-color">
+    
+
+    <div class="container row center-align"
+         style="margin-bottom: 0px !important;">
+        <div class="col s12 m8 l8 copy-right">
+            Copyright&nbsp;&copy;
+            
+                <span id="year">2018-2024</span>
+            
+            <a href="/about" target="_blank">javadaydayup</a>
+            |&nbsp;Powered by&nbsp;<a href="https://hexo.io/" target="_blank">Hexo</a>
+            |&nbsp;Theme&nbsp;<a href="https://github.com/blinkfox/hexo-theme-matery" target="_blank">Matery</a>
+            
+            <br>
+            
+            
+            
+                
+            
+            
+                <span id="busuanzi_container_site_pv">
+                &nbsp;|&nbsp;<i class="far fa-eye"></i>&nbsp;总访问量:&nbsp;
+                    <span id="busuanzi_value_site_pv" class="white-color"></span>
+            </span>
+            
+            
+                <span id="busuanzi_container_site_uv">
+                &nbsp;|&nbsp;<i class="fas fa-users"></i>&nbsp;总访问人数:&nbsp;
+                    <span id="busuanzi_value_site_uv" class="white-color"></span>
+            </span>
+            
+            <br>
+
+            <!-- 运行天数提醒. -->
+            
+            <br>
+            
+        </div>
+        <div class="col s12 m4 l4 social-link social-statis">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</div>
+    </div>
+</footer>
+
+<div class="progress-bar"></div>
+
+
+    <!-- 搜索遮罩框 -->
+<div id="searchModal" class="modal">
+    <div class="modal-content">
+        <div class="search-header">
+            <span class="title"><i class="fas fa-search"></i>&nbsp;&nbsp;搜索</span>
+            <input type="search" id="searchInput" name="s" placeholder="请输入搜索的关键字"
+                   class="search-input">
+        </div>
+        <div id="searchResult"></div>
+    </div>
+</div>
+
+<script type="text/javascript">
+$(function () {
+    var searchFunc = function (path, search_id, content_id) {
+        'use strict';
+        $.ajax({
+            url: path,
+            dataType: "xml",
+            success: function (xmlResponse) {
+                // get the contents from search data
+                var datas = $("entry", xmlResponse).map(function () {
+                    return {
+                        title: $("title", this).text(),
+                        content: $("content", this).text(),
+                        url: $("url", this).text()
+                    };
+                }).get();
+                var $input = document.getElementById(search_id);
+                var $resultContent = document.getElementById(content_id);
+                $input.addEventListener('input', function () {
+                    var str = '<ul class=\"search-result-list\">';
+                    var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+                    $resultContent.innerHTML = "";
+                    if (this.value.trim().length <= 0) {
+                        return;
+                    }
+                    // perform local searching
+                    datas.forEach(function (data) {
+                        var isMatch = true;
+                        var data_title = data.title.trim().toLowerCase();
+                        var data_content = data.content.trim().replace(/<[^>]+>/g, "").toLowerCase();
+                        var data_url = data.url;
+                        data_url = data_url.indexOf('/') === 0 ? data.url : '/' + data_url;
+                        var index_title = -1;
+                        var index_content = -1;
+                        var first_occur = -1;
+                        // only match artiles with not empty titles and contents
+                        if (data_title !== '' && data_content !== '') {
+                            keywords.forEach(function (keyword, i) {
+                                index_title = data_title.indexOf(keyword);
+                                index_content = data_content.indexOf(keyword);
+                                if (index_title < 0 && index_content < 0) {
+                                    isMatch = false;
+                                } else {
+                                    if (index_content < 0) {
+                                        index_content = 0;
+                                    }
+                                    if (i === 0) {
+                                        first_occur = index_content;
+                                    }
+                                }
+                            });
+                        }
+                        // show search results
+                        if (isMatch) {
+                            str += "<li><a href='" + data_url + "' class='search-result-title'>" + data_title + "</a>";
+                            var content = data.content.trim().replace(/<[^>]+>/g, "");
+                            if (first_occur >= 0) {
+                                // cut out 100 characters
+                                var start = first_occur - 20;
+                                var end = first_occur + 80;
+                                if (start < 0) {
+                                    start = 0;
+                                }
+                                if (start === 0) {
+                                    end = 100;
+                                }
+                                if (end > content.length) {
+                                    end = content.length;
+                                }
+                                var match_content = content.substr(start, end);
+                                // highlight all keywords
+                                keywords.forEach(function (keyword) {
+                                    var regS = new RegExp(keyword, "gi");
+                                    match_content = match_content.replace(regS, "<em class=\"search-keyword\">" + keyword + "</em>");
+                                });
+
+                                str += "<p class=\"search-result\">" + match_content + "...</p>"
+                            }
+                            str += "</li>";
+                        }
+                    });
+                    str += "</ul>";
+                    $resultContent.innerHTML = str;
+                });
+            }
+        });
+    };
+
+    searchFunc('/search.xml', 'searchInput', 'searchResult');
+});
+</script>
+
+    <!-- 白天和黑夜主题 -->
+<div class="stars-con">
+    <div id="stars"></div>
+    <div id="stars2"></div>
+    <div id="stars3"></div>  
+</div>
+
+<script>
+    function switchNightMode() {
+        $('<div class="Cuteen_DarkSky"><div class="Cuteen_DarkPlanet"></div></div>').appendTo($('body')),
+        setTimeout(function () {
+            $('body').hasClass('DarkMode') 
+            ? ($('body').removeClass('DarkMode'), localStorage.setItem('isDark', '0'), $('#sum-moon-icon').removeClass("fa-sun").addClass('fa-moon')) 
+            : ($('body').addClass('DarkMode'), localStorage.setItem('isDark', '1'), $('#sum-moon-icon').addClass("fa-sun").removeClass('fa-moon')),
+            
+            setTimeout(function () {
+            $('.Cuteen_DarkSky').fadeOut(1e3, function () {
+                $(this).remove()
+            })
+            }, 2e3)
+        })
+    }
+</script>
+
+    <!-- 回到顶部按钮 -->
+<div id="backTop" class="top-scroll">
+    <a class="btn-floating btn-large waves-effect waves-light" href="#!">
+        <i class="fas fa-arrow-up"></i>
+    </a>
+</div>
+
+
+    <script src="/libs/materialize/materialize.min.js"></script>
+    <script src="/libs/masonry/masonry.pkgd.min.js"></script>
+    <script src="/libs/aos/aos.js"></script>
+    <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
+    <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+    <script src="/js/matery.js"></script>
+
+    
+
+    
+    
+    
+
+    <!-- 雪花特效 -->
+    
+
+    <!-- 鼠标星星特效 -->
+    
+
+    
+
+    <!-- Baidu Analytics -->
+
+    <!-- Baidu Push -->
+
+<script>
+    (function () {
+        var bp = document.createElement('script');
+        var curProtocol = window.location.protocol.split(':')[0];
+        if (curProtocol === 'https') {
+            bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+        } else {
+            bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+        }
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(bp, s);
+    })();
+</script>
+
+    
+    
+    <script async src="/libs/others/busuanzi.pure.mini.js"></script>
+    
+
+    
+
+    
+
+    <!--腾讯兔小巢-->
+    
+    
+
+    
+
+    
+
+    
+    <script src="/libs/instantpage/instantpage.js" type="module"></script>
+    
+
+</body>
+
+</html>
